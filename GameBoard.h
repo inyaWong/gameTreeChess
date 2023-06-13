@@ -23,13 +23,16 @@ public:
     bool checkWin(int x, int y, char player);
     void aiMove(int &x, int &y);
     int evaluate(char player);
+    void findBestMove(int &x, int &y);
     int alphaBetaSearch(int depth, int alpha, int beta);
     void printBoard();
 
 private:
     char board[BOARD_SIZE][BOARD_SIZE];
+    int mBoard[BOARD_SIZE][BOARD_SIZE]; // 棋盘数组
     int bestMoveX;
     int bestMoveY;
+    int mNextMove; // 下一个落子方的颜色
 };
 
 #endif // GAMEBOARD_H_INCLUDED

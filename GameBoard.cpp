@@ -3,6 +3,7 @@
 #include <iostream>
 
 using namespace std;
+const int INF = 1e9;
 
 GameBoard::GameBoard()
 {
@@ -410,10 +411,10 @@ void GameBoard::findBestMove(int& x, int& y)
     int score = -INF;
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
-            if (mBoard[i][j] == EMPTY) {
-                mBoard[i][j] = mNextMove;
+            if (GameBoard::mBoard[i][j] == EMPTY) {
+                GameBoard::mBoard[i][j] = mNextMove;
                 int moveScore = miniMax(0, false, -INF, INF);
-                mBoard[i][j] = EMPTY;
+                GameBoard::mBoard[i][j] = EMPTY;
                 if (moveScore > score) {
                     score = moveScore;
                     x = i;
