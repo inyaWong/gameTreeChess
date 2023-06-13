@@ -425,17 +425,18 @@ void GameBoard::findBestMove(int& x, int& y)
     }
 }
 
-double GameBoard::miniMax(int depth, int alpha, int beta, int maximizingPlayer)
+double GameBoard::miniMax(int depth, double alpha, double beta, bool maximizingPlayer)
 {
     if(depth == 0 || isGameOver()) {
-        return evaluate();
+        return evaluate() * (maximizingPlayer ? 1 : -1);
     }
 
-    if(maximizingPlayer == mNextMove) { // 当前玩家是MAX
-        double bestValue = -DBL_MAX;
+    double bestValue;
+    if(maximizingPlayer) {
+        bestValue = -DBL_MAX;
         for(auto move : getValidMoves(mNextMove)) {
-            makeMove(move, maximizingPlayer);
-            double value = miniMax(depth - 1, alpha, beta, opposite(maximizingPlayer));
+            makeMove(move, mNextMove);
+            double value = miniMax(depth - 1, alpha, beta, false);
             undoMove(move);
             bestValue = max(bestValue, value);
             alpha = max(alpha, bestValue);
@@ -443,12 +444,11 @@ double GameBoard::miniMax(int depth, int alpha, int beta, int maximizingPlayer)
                 break;
             }
         }
-        return bestValue;
-    } else { // 当前玩家是MIN
-        double bestValue = DBL_MAX;
-        for(auto move : getValidMoves(mNextMove)) {
-            makeMove(move, maximizingPlayer);
-            double value = miniMax(depth - 1, alpha, beta, opposite(maximizingPlayer));
+    } else {
+        bestValue = DBL_MAX;
+        for(auto move : getValidMoves(opposite(mNextMove))) {
+            makeMove(move, opposite(mNextMove));
+            double value = miniMax(depth - 1, alpha, beta, true);
             undoMove(move);
             bestValue = min(bestValue, value);
             beta = min(beta, bestValue);
@@ -456,8 +456,8 @@ double GameBoard::miniMax(int depth, int alpha, int beta, int maximizingPlayer)
                 break;
             }
         }
-        return bestValue;
     }
+    return bestValue;
 }
 
 int GameBoard::alphaBetaSearch(int depth, int alpha, int beta)
@@ -544,4 +544,94 @@ void GameBoard::printBoard()
         }
         cout << endl;
     }
+}
+
+bool GameBoard::isGameOver() const
+{
+    // 如果下一步落子的玩家没有可以落子的位置，或者双方棋子数量不足，
+    // 或者搜索深度已经达到了最大值，就认为游戏已经结束
+    return getValidMoves(mNextMove).empty()
+           || mComputer.getPiecesCount() <= 2
+           || mHuman.getPiecesCount() <= 2
+           || mDepth >= MAX_SEARCH_DEPTH;
+}
+
+double GameBoard::evaluate() const
+{
+    double score = 0;
+
+    // 当前玩家的棋子数
+    int playerCount = (mNextMove == BLACK) ? mComputer.getPiecesCount() : mHuman.getPiecesCount();
+    int opponentCount = (mNextMove == BLACK) ? mHuman.getPiecesCount() : mComputer.getPiecesCount();
+
+    // 棋子的数量对分数的贡献
+    score += (playerCount - opponentCount) * 10;
+
+    // 遍历棋盘上的所有位置，计算棋子的位置得分
+    for(int i=0; i<NUM_ROWS; i++) {
+        for(int j=0; j<NUM_COLUMNS; j++) {
+            if(mBoard[i][j] == EMPTY) {
+                continue;
+            }
+            double squareScore = (mBoard[i][j] == mNextMove) ? 1 : -1; // 根据棋子颜色设置得分
+            if(mBoard[i][j] == BLACK) {
+                if(i == 0 || i == NUM_ROWS - 1) {
+                    squareScore += 0.5;
+                }
+                if(j == 0 || j == NUM_COLUMNS - 1) {
+                    squareScore += 0.5;
+                }
+            } else {
+                if(i == 0 || i == NUM_ROWS - 1) {
+                    squareScore -= 0.5;
+                }
+                if(j == 0 || j == NUM_COLUMNS - 1) {
+                    squareScore -= 0.5;
+                }
+            }
+            score += squareScore;
+        }
+    }
+
+    return score;
+}
+
+double GameBoard::evaluate() const
+{
+    double score = 0;
+
+    // 当前玩家的棋子数
+    int playerCount = (mNextMove == BLACK) ? mComputer.getPiecesCount() : mHuman.getPiecesCount();
+    int opponentCount = (mNextMove == BLACK) ? mHuman.getPiecesCount() : mComputer.getPiecesCount();
+
+    // 棋子的数量对分数的贡献
+    score += (playerCount - opponentCount) * 10;
+
+    // 遍历棋盘上的所有位置，计算棋子的位置得分
+    for(int i=0; i<NUM_ROWS; i++) {
+        for(int j=0; j<NUM_COLUMNS; j++) {
+            if(mBoard[i][j] == EMPTY) {
+                continue;
+            }
+            double squareScore = (mBoard[i][j] == mNextMove) ? 1 : -1; // 根据棋子颜色设置得分
+            if(mBoard[i][j] == BLACK) {
+                if(i == 0 || i == NUM_ROWS - 1) {
+                    squareScore += 0.5;
+                }
+                if(j == 0 || j == NUM_COLUMNS - 1) {
+                    squareScore += 0.5;
+                }
+            } else {
+                if(i == 0 || i == NUM_ROWS - 1) {
+                    squareScore -= 0.5;
+                }
+                if(j == 0 || j == NUM_COLUMNS - 1) {
+                    squareScore -= 0.5;
+                }
+            }
+            score += squareScore;
+        }
+    }
+
+    return score;
 }

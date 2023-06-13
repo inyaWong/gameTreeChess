@@ -25,8 +25,10 @@ public:
     int evaluate(char player);
     void findBestMove(int &x, int &y);
     int alphaBetaSearch(int depth, int alpha, int beta);
-    double miniMax(int depth, int alpha, int beta, int maximizingPlayer);
+    double miniMax(int depth, double alpha, double beta, bool maximizingPlayer);
     void printBoard();
+    bool isGameOver() const;
+    double evaluate() const;
 
 private:
     char board[BOARD_SIZE][BOARD_SIZE];
