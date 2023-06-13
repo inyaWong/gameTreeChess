@@ -4,6 +4,10 @@
 
 #pragma once
 #include <vector>
+#include <tuple>
+
+
+enum class Player {BLACK, WHITE};  // 定义 Player 枚举类型
 class GameBoard
 {
 public:
@@ -13,7 +17,6 @@ public:
     static const char EMPTY = '.';
     static const int SCORE_MAX = 99999999;
     static const int SCORE_MIN = -99999999;
-    char getPieceAt(int row, int col) const;
 
     GameBoard();
 
@@ -29,13 +32,23 @@ public:
     void printBoard();
     bool isGameOver() const;
     double evaluate() const;
+    static constexpr int MAX_SEARCH_DEPTH = 4; // 最大搜索深度
+    void undoMove(int row, int col);
+    char opposite(char player);
+    std::vector<std::tuple<int, int, Player>> getValidMoves(Player player) const;
+    bool makeMove(int row, int col);
 
-private:
+
     char board[BOARD_SIZE][BOARD_SIZE];
     int mBoard[BOARD_SIZE][BOARD_SIZE]; // 棋盘数组
     int bestMoveX;
     int bestMoveY;
     int mNextMove; // 下一个落子方的颜色
+    char mHuman, mComputer; // 人类玩家和计算机玩家
+    int mDepth; // 搜索深度
+    std::pair<int, int> mLastMove;
+    bool mIsBlackTurn;
+
 
 };
 

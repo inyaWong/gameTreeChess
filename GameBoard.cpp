@@ -2,13 +2,13 @@
 #include "GameController.h"
 #include <iostream>
 #include <cfloat>
+#include <vector>
+#include <algorithm>
+#define BLACK 'X'
 
 using namespace std;
 const int INF = 1e9;
 
-char GameBoard::getPieceAt(int row, int col) const {
-    return mBoard[row][col];
-}
 
 GameBoard::GameBoard()
 {
@@ -437,31 +437,48 @@ double GameBoard::miniMax(int depth, double alpha, double beta, bool maximizingP
     }
 
     double bestValue;
-    if(maximizingPlayer) {
-        bestValue = -DBL_MAX;
-        for(auto move : getValidMoves(mNextMove)) {
-            makeMove(move, mNextMove);
-            double value = miniMax(depth - 1, alpha, beta, false);
-            undoMove(move);
-            bestValue = max(bestValue, value);
-            alpha = max(alpha, bestValue);
+
+    if(maximizingPlayer) {   // MAX
+        double bestScore = -INF;
+        for(auto [row, col, player] : getValidMoves(curPlayer)) {
+            // 做一个选择
+            mBoard[row][col] = player == Player::BLACK ? BLACK : WHITE;
+            // 递归调用，获取对手的最佳得分（负极大值）
+            double score = miniMax(depth - 1, alpha, beta, false);
+            // 撤销选择
+            mBoard[row][col] = EMPTY;
+            // 更新最佳得分和最佳落点
+            if(score > bestScore) {
+                bestScore = score;
+                bestMove = std::make_pair(row, col);
+            }
+            // 剪枝
+            alpha = std::max(alpha, bestScore);
             if(beta <= alpha) {
                 break;
             }
         }
-    } else {
-        bestValue = DBL_MAX;
-        for(auto move : getValidMoves(opposite(mNextMove))) {
-            makeMove(move, opposite(mNextMove));
-            double value = miniMax(depth - 1, alpha, beta, true);
-            undoMove(move);
-            bestValue = min(bestValue, value);
-            beta = min(beta, bestValue);
-            if(beta <= alpha) {
-                break;
-            }
+    } else {   // MIN
+    double bestScore = INF;
+    for(auto [row, col, player] : getValidMoves(opposite(curPlayer))) {
+        // 做一个选择
+        mBoard[row][col] = player == Player::BLACK ? BLACK : WHITE;
+        // 递归调用，获取对手的最佳得分（负极大值）
+        double score = miniMax(depth - 1, alpha, beta, true);
+        // 撤销选择
+        mBoard[row][col] = EMPTY;
+        // 更新最佳得分和最佳落点
+        if(score < bestScore) {
+            bestScore = score;
+            bestMove = std::make_pair(row, col);
+        }
+        // 剪枝
+        beta = std::min(beta, bestScore);
+        if(beta <= alpha) {
+            break;
         }
     }
+}
     return bestValue;
 }
 
@@ -541,12 +558,6 @@ int GameBoard::alphaBetaSearch(int depth, int alpha, int beta)
 
 void GameBoard::printBoard()
 {
-    for(int row = 0; row < NUM_ROWS; ++row) {
-    for(int col = 0; col < NUM_COLUMNS; ++col) {
-        cout << mBoard.getPieceAt(row, col) << " ";
-    }
-    cout << endl;
-}
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         for (int j = 0; j < BOARD_SIZE; j++)
@@ -645,4 +656,40 @@ double GameBoard::evaluate() const
     }
 
     return score;
+}
+
+void GameBoard::undoMove(int row, int col)
+{
+    mBoard[row][col] = EMPTY;
+    mLastMove = std::make_pair(-1, -1);
+    mIsBlackTurn = !mIsBlackTurn;
+}
+
+char GameBoard::opposite(char player)
+{
+    return (player == BLACK) ? WHITE : BLACK;
+}
+
+std::vector<std::tuple<int, int, int>> GameBoard::getValidMoves(Player player) const
+{
+    std::vector<std::tuple<int, int, int>> moves;
+    for(int row = 0; row < NUM_ROWS; ++row) {
+        for(int col = 0; col < NUM_COLUMNS; ++col) {
+            if(mBoard[row][col] == EMPTY && isVaildMove(row, col, player)) {
+                moves.push_back(std::make_tuple(row, col, player));
+            }
+        }
+    }
+    return moves;
+}
+
+bool GameBoard::makeMove(int row, int col)
+{
+    if(mBoard[row][col] != EMPTY || !isVaildMove(row, col, mIsBlackTurn)) {
+        return false;
+    }
+    mBoard[row][col] = mIsBlackTurn ? BLACK : WHITE;
+    mLastMove = std::make_pair(row, col);
+    mIsBlackTurn = !mIsBlackTurn;
+    return true;
 }
