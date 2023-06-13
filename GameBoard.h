@@ -28,6 +28,8 @@ public:
 
 private:
     char board[BOARD_SIZE][BOARD_SIZE];
+    int bestMoveX;
+    int bestMoveY;
 };
 
 #endif // GAMEBOARD_H_INCLUDED

@@ -405,6 +405,25 @@ int GameBoard::evaluate(char player)
     return score;
 }
 
+void GameBoard::findBestMove(int& x, int& y)
+{
+    int score = -INF;
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            if (mBoard[i][j] == EMPTY) {
+                mBoard[i][j] = mNextMove;
+                int moveScore = miniMax(0, false, -INF, INF);
+                mBoard[i][j] = EMPTY;
+                if (moveScore > score) {
+                    score = moveScore;
+                    x = i;
+                    y = j;
+                }
+            }
+        }
+    }
+}
+
 int GameBoard::alphaBetaSearch(int depth, int alpha, int beta)
 {
     if (depth == 0)
