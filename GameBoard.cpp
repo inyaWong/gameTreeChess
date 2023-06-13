@@ -425,6 +425,41 @@ void GameBoard::findBestMove(int& x, int& y)
     }
 }
 
+double GameBoard::miniMax(int depth, int alpha, int beta, int maximizingPlayer)
+{
+    if(depth == 0 || isGameOver()) {
+        return evaluate();
+    }
+
+    if(maximizingPlayer == mNextMove) { // 当前玩家是MAX
+        double bestValue = -DBL_MAX;
+        for(auto move : getValidMoves(mNextMove)) {
+            makeMove(move, maximizingPlayer);
+            double value = miniMax(depth - 1, alpha, beta, opposite(maximizingPlayer));
+            undoMove(move);
+            bestValue = max(bestValue, value);
+            alpha = max(alpha, bestValue);
+            if(beta <= alpha) {
+                break;
+            }
+        }
+        return bestValue;
+    } else { // 当前玩家是MIN
+        double bestValue = DBL_MAX;
+        for(auto move : getValidMoves(mNextMove)) {
+            makeMove(move, maximizingPlayer);
+            double value = miniMax(depth - 1, alpha, beta, opposite(maximizingPlayer));
+            undoMove(move);
+            bestValue = min(bestValue, value);
+            beta = min(beta, bestValue);
+            if(beta <= alpha) {
+                break;
+            }
+        }
+        return bestValue;
+    }
+}
+
 int GameBoard::alphaBetaSearch(int depth, int alpha, int beta)
 {
     if (depth == 0)

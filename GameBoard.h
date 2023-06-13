@@ -25,6 +25,7 @@ public:
     int evaluate(char player);
     void findBestMove(int &x, int &y);
     int alphaBetaSearch(int depth, int alpha, int beta);
+    double miniMax(int depth, int alpha, int beta, int maximizingPlayer);
     void printBoard();
 
 private:
@@ -33,6 +34,7 @@ private:
     int bestMoveX;
     int bestMoveY;
     int mNextMove; // 下一个落子方的颜色
+
 };
 
 #endif // GAMEBOARD_H_INCLUDED
