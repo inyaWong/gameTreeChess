@@ -1,9 +1,14 @@
 #include "GameBoard.h"
 #include "GameController.h"
 #include <iostream>
+#include <cfloat>
 
 using namespace std;
 const int INF = 1e9;
+
+char GameBoard::getPieceAt(int row, int col) const {
+    return mBoard[row][col];
+}
 
 GameBoard::GameBoard()
 {
@@ -536,6 +541,12 @@ int GameBoard::alphaBetaSearch(int depth, int alpha, int beta)
 
 void GameBoard::printBoard()
 {
+    for(int row = 0; row < NUM_ROWS; ++row) {
+    for(int col = 0; col < NUM_COLUMNS; ++col) {
+        cout << mBoard.getPieceAt(row, col) << " ";
+    }
+    cout << endl;
+}
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         for (int j = 0; j < BOARD_SIZE; j++)

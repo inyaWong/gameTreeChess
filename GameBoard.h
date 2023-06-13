@@ -4,7 +4,6 @@
 
 #pragma once
 #include <vector>
-
 class GameBoard
 {
 public:
@@ -14,6 +13,7 @@ public:
     static const char EMPTY = '.';
     static const int SCORE_MAX = 99999999;
     static const int SCORE_MIN = -99999999;
+    char getPieceAt(int row, int col) const;
 
     GameBoard();
 
